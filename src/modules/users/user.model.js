@@ -1,11 +1,14 @@
 import mongoose, {Schema} from 'mongoose';
 import validator from 'validator';
+import extendSchema from 'mongoose-extend-schema'
 import {passwordReg} from './user.validations';
 import bcrypt from 'bcrypt-nodejs';
 import jwt from 'jsonwebtoken';
 import constants from '../../config/constants';
+import  {Base,setAddedDate,setUpdatedDate} from '../../commons/models/Base.model';
 
-const UserSchema = new Schema({
+const UserSchema = new Schema( {
+        ...Base,
         email: {
             type: String,
             unique: true,
@@ -46,33 +49,35 @@ const UserSchema = new Schema({
                 message: '{VALUE} is not a valid password!',
             },
         },
-        role:{
+        role: {
             type: String,
             enum: constants.ROLE,
             required: [true, 'Role is required!'],
             default: constants.USER_ROLES.USER
         }
     },
-    {timestamps: true},
+    {timestamps: false},
 );
 
 UserSchema.pre('save', function (next) {
     var user = this;
     var SALT_FACTOR = 5;
 
-    if(!user.isModified('password')){
+    if (!user.isModified('password')) {
         return next();
-    } 
+    }
 
-    bcrypt.genSalt(SALT_FACTOR, function(err, salt){
+    setAddedDate();
 
-        if(err){
+    bcrypt.genSalt(SALT_FACTOR, function (err, salt) {
+
+        if (err) {
             return next(err);
         }
 
-        bcrypt.hash(user.password, salt, null, function(err, hash){
+        bcrypt.hash(user.password, salt, null, function (err, hash) {
 
-            if(err){
+            if (err) {
                 return next(err);
             }
 
@@ -82,6 +87,10 @@ UserSchema.pre('save', function (next) {
         });
 
     });
+});
+
+UserSchema.pre('update',function (next) {
+    setUpdatedDate();
 });
 
 UserSchema.methods = {
@@ -96,12 +105,12 @@ UserSchema.methods = {
             constants.JWT_SECRET,
         );
     },
-    toJSON() {
-        return {
-            _id: this._id,
-            userName: this.userName,
-        };
-    },
+    // toJSON() {
+    //     return {
+    //         _id: this._id,
+    //         userName: this.userName,
+    //     };
+    // },
     toAuthJSON() {
         return {
             _id: this._id,

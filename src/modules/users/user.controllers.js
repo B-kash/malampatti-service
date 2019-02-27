@@ -2,6 +2,7 @@ import HTTPStatus from 'http-status';
 import User from './user.model';
 
 export async function signUp(req, res) {
+    console.log(req.body);
     try {
         const user = await User.create(req.body);
         return res.status(HTTPStatus.CREATED).json(user.toAuthJSON());
@@ -13,6 +14,20 @@ export async function signUp(req, res) {
 export function login(req, res, next) {
     res.status(HTTPStatus.OK).json(req.user.toAuthJSON());
     return next();
+}
+
+export function getAllUsers(req,res,next) {
+     User.find({},function(err,data){
+         console.log("data  ", data);
+
+         if(!err){
+            return res.status(HTTPStatus.OK).json(data);
+
+        }else{
+            console.log("Err here ", err);
+            return res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json(err);
+        }
+    });
 }
 
 export const roleAuth = function (roles) {
