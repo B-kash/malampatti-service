@@ -68,7 +68,7 @@ UserSchema.pre('save', function (next) {
     }
 
     setAddedDate();
-
+// user.addedDate = new Date();
     bcrypt.genSalt(SALT_FACTOR, function (err, salt) {
 
         if (err) {

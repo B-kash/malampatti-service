@@ -18,8 +18,6 @@ export function login(req, res, next) {
 
 export function getAllUsers(req,res,next) {
      User.find({},function(err,data){
-         console.log("data  ", data);
-
          if(!err){
             return res.status(HTTPStatus.OK).json(data);
 
